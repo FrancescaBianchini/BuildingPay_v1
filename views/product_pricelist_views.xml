@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================
+         ESTENSIONE FORM VIEW: product.pricelist
+         Aggiunge campi BuildingPay (flag condominio, retrocessioni)
+    ================================================= -->
+    <record id="view_product_pricelist_form_buildingpay" model="ir.ui.view">
+        <field name="name">product.pricelist.form.buildingpay</field>
+        <field name="model">product.pricelist</field>
+        <field name="inherit_id" ref="product.product_pricelist_view2"/>
+        <field name="arch" type="xml">
+            <!-- Aggiunge sezione BuildingPay sotto le impostazioni base -->
+            <xpath expr="//sheet/group" position="after">
+                <group string="BuildingPay - Listino Condominio">
+                    <field name="is_listino_condominio"/>
+                </group>
+                <group
+                    attrs="{'invisible': [('is_listino_condominio', '=', False)]}"
+                    string="Configurazione Retrocessioni">
+                    <group>
+                        <field name="perc_retrocessione_amministratore"
+                               attrs="{'invisible': [('is_listino_condominio', '=', False)]}"/>
+                        <field name="perc_retrocessione_referrer"
+                               attrs="{'invisible': [('is_listino_condominio', '=', False)]}"/>
+                    </group>
+                    <group>
+                        <field name="amministratore_ids"
+                               widget="many2many_tags"
+                               domain="[('is_amministratore', '=', True)]"
+                               attrs="{'invisible': [('is_listino_condominio', '=', False)]}"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

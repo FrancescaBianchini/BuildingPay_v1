@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================
+         PAGINA PORTALE: Contratto Generale
+    ================================================= -->
+    <template id="portal_contratto"
+              name="BuildingPay - Contratto Generale"
+              inherit_id="portal.portal_layout">
+
+        <xpath expr="//t[@t-call='portal.portal_layout']" position="inside">
+            <t t-set="o_portal_fullwidth_alert" t-value="False"/>
+        </xpath>
+
+    </template>
+
+    <template id="portal_contratto_page"
+              name="BuildingPay - Contratto Generale (Pagina)">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="False"/>
+
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Contratto Generale</t>
+            </t>
+
+            <div class="container mt-4">
+
+                <!-- Messaggi di feedback -->
+                <t t-if="request.params.get('success')">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fa fa-check-circle me-2"/>
+                        Il file contratto è stato caricato con successo!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('error')">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fa fa-exclamation-circle me-2"/>
+                        Si è verificato un errore. Riprova o contatta l'assistenza.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+
+                <!-- Info: ogni nuovo condominio richiede nuovo contratto -->
+                <div class="alert alert-info mb-4" role="alert">
+                    <i class="fa fa-info-circle me-2"/>
+                    <strong>Attenzione:</strong> ogni volta che aggiungi un nuovo condominio,
+                    dovrai scaricare nuovamente il contratto, compilarlo con i nuovi dati e
+                    caricarlo in sostituzione del precedente.
+                </div>
+
+                <div class="row">
+                    <!-- == Download template  == -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary text-white">
+                                <i class="fa fa-download me-2"/>
+                                Scarica il contratto
+                            </div>
+                            <div class="card-body">
+                                <p>
+                                    Scarica il file
+                                    <strong>Accordo Condomini Aggregati</strong>
+                                    pre-compilato con i tuoi dati:
+                                </p>
+                                <ul class="text-muted small">
+                                    <li>Nome e cognome: <strong t-field="partner.name"/></li>
+                                    <li>Codice fiscale:
+                                        <strong>
+                                            <t t-esc="partner.fiscalcode or 'non inserito'"/>
+                                        </strong>
+                                    </li>
+                                </ul>
+                                <t t-if="config and config.contratto_template">
+                                    <a href="/my/contratto/download"
+                                       class="btn btn-primary mt-2">
+                                        <i class="fa fa-file-word-o me-2"/>
+                                        Scarica Accordo Condomini Aggregati.docx
+                                    </a>
+                                </t>
+                                <t t-else="">
+                                    <div class="alert alert-warning mt-2">
+                                        Template non ancora disponibile.
+                                        Contatta l'amministratore di sistema.
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- == Upload contratto firmato  == -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-success text-white">
+                                <i class="fa fa-upload me-2"/>
+                                Carica contratto firmato
+                            </div>
+                            <div class="card-body">
+                                <t t-if="partner.contratto_file">
+                                    <div class="alert alert-success mb-3">
+                                        <i class="fa fa-check-circle me-2"/>
+                                        Contratto caricato il
+                                        <strong>
+                                            <t t-esc="partner.contratto_upload_date and
+                                                      partner.contratto_upload_date.strftime('%d/%m/%Y %H:%M')
+                                                      or 'data sconosciuta'"/>
+                                        </strong>
+                                        <br/>
+                                        <small class="text-muted">
+                                            File: <t t-esc="partner.contratto_filename or 'contratto'"/>
+                                        </small>
+                                    </div>
+                                </t>
+
+                                <form action="/my/contratto/upload"
+                                      method="post"
+                                      enctype="multipart/form-data">
+                                    <input type="hidden" name="csrf_token"
+                                           t-att-value="request.csrf_token()"/>
+                                    <div class="mb-3">
+                                        <label for="contratto_file" class="form-label">
+                                            Seleziona il file compilato e firmato:
+                                        </label>
+                                        <input type="file"
+                                               name="contratto_file"
+                                               id="contratto_file"
+                                               class="form-control"
+                                               accept=".docx,.pdf"
+                                               required="required"/>
+                                        <div class="form-text">
+                                            Formati accettati: .docx, .pdf
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fa fa-upload me-2"/>
+                                        <t t-if="partner.contratto_file">
+                                            Sostituisci contratto
+                                        </t>
+                                        <t t-else="">
+                                            Carica contratto
+                                        </t>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Riepilogo stato -->
+                <div class="card mt-2 mb-4">
+                    <div class="card-header">
+                        <i class="fa fa-info-circle me-2"/>
+                        Stato del contratto
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p>
+                                    <strong>Accordo Condomini Aggregati:</strong>
+                                    <t t-if="partner.accordo_condomini_aggregati">
+                                        <span class="badge bg-success ms-2">
+                                            <i class="fa fa-check me-1"/>Caricato
+                                        </span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="badge bg-warning text-dark ms-2">
+                                            <i class="fa fa-clock-o me-1"/>In attesa
+                                        </span>
+                                    </t>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p>
+                                    <strong>Condomini gestiti:</strong>
+                                    <span class="badge bg-info ms-2">
+                                        <t t-esc="partner.condominio_count"/>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </t>
+    </template>
+</odoo>

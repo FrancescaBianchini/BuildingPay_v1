@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================
+         FORM VIEW: buildingpay.config
+    ================================================= -->
+    <record id="view_buildingpay_config_form" model="ir.ui.view">
+        <field name="name">buildingpay.config.form</field>
+        <field name="model">buildingpay.config</field>
+        <field name="arch" type="xml">
+            <form string="Configurazione BuildingPay">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="website_id" options="{'no_create': True}"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <!-- Sezione Sito Web -->
+                        <group string="Sito Web">
+                            <field name="website_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- Tab: Contratto -->
+                        <page string="Template Contratto" name="template">
+                            <group>
+                                <field name="contratto_template" widget="binary"
+                                       filename="contratto_template_filename"/>
+                                <field name="contratto_template_filename"/>
+                            </group>
+                        </page>
+
+                        <!-- Tab: Attività automatica -->
+                        <page string="Attività Automatica" name="activity">
+                            <group>
+                                <field name="create_activity_on_contract"/>
+                            </group>
+                            <group
+                                attrs="{'invisible': [('create_activity_on_contract', '=', False)]}">
+                                <group string="Configurazione attività">
+                                    <field name="activity_responsible_id"
+                                        attrs="{'required': [('create_activity_on_contract', '=', True)]}"/>
+                                    <field name="activity_days"
+                                        attrs="{'required': [('create_activity_on_contract', '=', True)]}"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Tab: Destinatari email -->
+                        <page string="Destinatari Email" name="emails">
+                            <group>
+                                <group string="Report condomini attivi">
+                                    <field name="condomini_attivati_email"
+                                           placeholder="email1@esempio.it, email2@esempio.it"/>
+                                </group>
+                                <group string="Notifica condomini dismessi">
+                                    <field name="condomini_dismessi_email"
+                                           placeholder="email1@esempio.it, email2@esempio.it"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================
+         LIST VIEW: buildingpay.config
+    ================================================= -->
+    <record id="view_buildingpay_config_list" model="ir.ui.view">
+        <field name="name">buildingpay.config.list</field>
+        <field name="model">buildingpay.config</field>
+        <field name="arch" type="xml">
+            <list string="Configurazioni BuildingPay">
+                <field name="website_id"/>
+                <field name="create_activity_on_contract"/>
+                <field name="activity_responsible_id"/>
+                <field name="activity_days"/>
+                <field name="condomini_attivati_email"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ================================================
+         ACTION: buildingpay.config
+    ================================================= -->
+    <record id="action_buildingpay_config" model="ir.actions.act_window">
+        <field name="name">Configurazione BuildingPay</field>
+        <field name="res_model">buildingpay.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea la prima configurazione BuildingPay
+            </p>
+            <p>
+                Configura il sito web, il template del contratto e le
+                impostazioni per le attività automatiche.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================
+         FORM DI REGISTRAZIONE BUILDINGPAY
+         Estende il form standard con campi aggiuntivi
+         e gestisce il codice referrer
+    ================================================= -->
+    <template id="signup_form"
+              name="BuildingPay - Form di Registrazione"
+              inherit_id="auth_signup.signup">
+
+        <!-- Sostituiamo il form standard con quello BuildingPay -->
+        <xpath expr="//form[hasclass('oe_signup_form')]" position="replace">
+            <form class="oe_signup_form buildingpay-signup-form"
+                  action="/web/signup"
+                  method="post"
+                  enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token"
+                       t-att-value="request.csrf_token()"/>
+                <input type="hidden" name="redirect" t-att-value="redirect or ''"/>
+
+                <!-- Referrer code nascosto -->
+                <t t-if="referrer_code">
+                    <input type="hidden" name="referrer_code" t-att-value="referrer_code"/>
+                </t>
+
+                <!-- Messaggio referrer (se presente) -->
+                <t t-if="referrer_partner">
+                    <div class="alert alert-info mb-4" role="alert">
+                        <i class="fa fa-user-plus me-2"/>
+                        Sei stato invitato da <strong t-field="referrer_partner.name"/>
+                        ad iscriverti a BuildingPay.
+                    </div>
+                </t>
+
+                <!-- Errori generali -->
+                <t t-if="error and error.get('general')">
+                    <div class="alert alert-danger">
+                        <t t-esc="error.get('general')"/>
+                    </div>
+                </t>
+
+                <!-- == Dati personali  == -->
+                <h5 class="mb-3">Dati personali</h5>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="col-form-label" for="name">
+                            Nome e Cognome <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               name="name"
+                               id="name"
+                               class="form-control"
+                               t-att-class="'is-invalid' if error and error.get('name') else ''"
+                               t-att-value="form_data.get('name', '') if form_data else ''"
+                               placeholder="Es. Mario Rossi"
+                               required="required"
+                               autofocus="autofocus"/>
+                        <t t-if="error and error.get('name')">
+                            <div class="invalid-feedback">
+                                <t t-esc="error.get('name')"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="col-form-label" for="fiscalcode">
+                            Codice Fiscale
+                        </label>
+                        <input type="text"
+                               name="fiscalcode"
+                               id="fiscalcode"
+                               class="form-control"
+                               t-att-value="form_data.get('fiscalcode', '') if form_data else ''"
+                               placeholder="Es. RSSMRA80A01H501Z"
+                               maxlength="16"/>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="col-form-label" for="vat">
+                            Partita IVA
+                        </label>
+                        <input type="text"
+                               name="vat"
+                               id="vat"
+                               class="form-control"
+                               t-att-value="form_data.get('vat', '') if form_data else ''"
+                               placeholder="Es. IT01234567890"/>
+                    </div>
+                </div>
+
+                <!-- == Indirizzo  == -->
+                <h5 class="mb-3 mt-2">Indirizzo</h5>
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="col-form-label" for="street">
+                            Via / Indirizzo <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               name="street"
+                               id="street"
+                               class="form-control"
+                               t-att-class="'is-invalid' if error and error.get('street') else ''"
+                               t-att-value="form_data.get('street', '') if form_data else ''"
+                               placeholder="Es. Via Roma 1"
+                               required="required"/>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="col-form-label" for="street2">
+                            Interno / Scala
+                        </label>
+                        <input type="text"
+                               name="street2"
+                               id="street2"
+                               class="form-control"
+                               t-att-value="form_data.get('street2', '') if form_data else ''"
+                               placeholder="Es. Sc. A Int. 3"/>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="col-form-label" for="zip">
+                            CAP <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               name="zip"
+                               id="zip"
+                               class="form-control"
+                               t-att-class="'is-invalid' if error and error.get('zip') else ''"
+                               t-att-value="form_data.get('zip', '') if form_data else ''"
+                               placeholder="Es. 00100"
+                               required="required"/>
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <label class="col-form-label" for="city">
+                            Città <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               name="city"
+                               id="city"
+                               class="form-control"
+                               t-att-class="'is-invalid' if error and error.get('city') else ''"
+                               t-att-value="form_data.get('city', '') if form_data else ''"
+                               placeholder="Es. Roma"
+                               required="required"/>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="col-form-label" for="country_id">Paese</label>
+                        <select name="country_id" id="country_id" class="form-select">
+                            <option value="">-- Seleziona --</option>
+                            <t t-foreach="request.env['res.country'].sudo().search([], order='name')"
+                               t-as="country">
+                                <option t-att-value="country.id"
+                                        t-att-selected="'selected' if form_data and str(form_data.get('country_id','')) == str(country.id) else None">
+                                    <t t-esc="country.name"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- == Credenziali  == -->
+                <h5 class="mb-3 mt-2">Accesso</h5>
+
+                <div class="mb-3">
+                    <label class="col-form-label" for="login">
+                        Email (username) <span class="text-danger">*</span>
+                    </label>
+                    <input type="email"
+                           name="login"
+                           id="login"
+                           class="form-control"
+                           t-att-class="'is-invalid' if error and error.get('login') else ''"
+                           t-att-value="form_data.get('login', '') if form_data else ''"
+                           placeholder="La tua email"
+                           required="required"/>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="col-form-label" for="password">
+                            Password <span class="text-danger">*</span>
+                        </label>
+                        <input type="password"
+                               name="password"
+                               id="password"
+                               class="form-control"
+                               t-att-class="'is-invalid' if error and error.get('password') else ''"
+                               required="required"/>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="col-form-label" for="confirm_password">
+                            Conferma password <span class="text-danger">*</span>
+                        </label>
+                        <input type="password"
+                               name="confirm_password"
+                               id="confirm_password"
+                               class="form-control"
+                               t-att-class="'is-invalid' if error and error.get('confirm_password') else ''"
+                               required="required"/>
+                        <t t-if="error and error.get('confirm_password')">
+                            <div class="invalid-feedback">
+                                <t t-esc="error.get('confirm_password')"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fa fa-user-plus me-2"/>
+                        Registrati
+                    </button>
+                </div>
+
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        Hai già un account?
+                        <a href="/web/login">Accedi qui</a>
+                    </small>
+                </div>
+            </form>
+        </xpath>
+    </template>
+</odoo>

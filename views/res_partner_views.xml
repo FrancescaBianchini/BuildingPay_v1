@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================
+         ESTENSIONE FORM VIEW: res.partner
+         Aggiunge tab BuildingPay con tutti i campi custom
+    ================================================= -->
+    <record id="view_partner_form_buildingpay" model="ir.ui.view">
+        <field name="name">res.partner.form.buildingpay</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Aggiunge checkbox Amministratore accanto al nome -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="is_amministratore"
+                       attrs="{'readonly': [('id', '!=', False)]}"
+                       groups="buildingpay.group_buildingpay_manager"/>
+                <!-- Solo lettura per utenti non manager -->
+                <field name="is_amministratore"
+                       readonly="1"
+                       groups="base.group_user"
+                       force_save="1"
+                       invisible="1"/>
+            </xpath>
+
+            <!-- Aggiunge il tab BuildingPay nel notebook -->
+            <xpath expr="//notebook" position="inside">
+                <page string="BuildingPay" name="buildingpay_page"
+                      attrs="{'invisible': [('is_amministratore', '=', False),
+                                           ('type', '!=', 'condominio')]}">
+                    <notebook>
+                        <!-- == Dati Amministratore  == -->
+                        <page string="Amministratore"
+                              attrs="{'invisible': [('is_amministratore', '=', False)]}">
+                            <group>
+                                <group string="Informazioni amministratore">
+                                    <field name="is_amministratore"
+                                           groups="buildingpay.group_buildingpay_manager"/>
+                                    <field name="referrer_id"
+                                           domain="[('is_amministratore', '=', True)]"/>
+                                    <field name="referrer_code" readonly="1"/>
+                                    <field name="listino_condominio_id"
+                                           domain="[('is_listino_condominio', '=', True)]"/>
+                                </group>
+                                <group string="Contratto">
+                                    <field name="accordo_condomini_aggregati" readonly="1"/>
+                                    <field name="contratto_upload_date" readonly="1"/>
+                                </group>
+                            </group>
+                            <!-- Condomini collegati -->
+                            <separator string="Condomini gestiti"/>
+                            <field name="condominio_ids"
+                                   mode="list"
+                                   nolabel="1"
+                                   context="{'default_type': 'condominio',
+                                             'default_parent_id': active_id}">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="street"/>
+                                    <field name="city"/>
+                                    <field name="fiscalcode"/>
+                                    <field name="accordo_condomini_aggregati"/>
+                                    <field name="active" column_invisible="True"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- == Dati Condominio  == -->
+                        <page string="Dati Condominio"
+                              attrs="{'invisible': [('type', '!=', 'condominio')]}">
+                            <group>
+                                <group string="Dati fiscali">
+                                    <field name="fiscalcode"/>
+                                    <field name="pec_mail"/>
+                                    <field name="codice_destinatario"/>
+                                    <field name="electronic_invoice_subjected"/>
+                                    <field name="electronic_invoice_obliged_subject"/>
+                                </group>
+                                <group string="Stato">
+                                    <field name="accordo_condomini_aggregati"/>
+                                    <field name="data_archiviazione" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ================================================
+         ESTENSIONE LIST VIEW: res.partner
+         Aggiunge colonna is_amministratore
+    ================================================= -->
+    <record id="view_partner_list_buildingpay" model="ir.ui.view">
+        <field name="name">res.partner.list.buildingpay</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_directory_form"/>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <!-- Non estendiamo la vista directory; estendiamo la list standard -->
+        </field>
+    </record>
+
+    <!-- Estensione della lista contatti principale -->
+    <record id="view_res_partner_list_buildingpay" model="ir.ui.view">
+        <field name="name">res.partner.list.buildingpay.ext</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.res_partner_view_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="is_amministratore" optional="show"/>
+                <field name="accordo_condomini_aggregati" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ================================================
+         ESTENSIONE SEARCH VIEW: res.partner
+         Aggiunge filtri e raggruppamenti BuildingPay
+    ================================================= -->
+    <record id="view_res_partner_filter_buildingpay" model="ir.ui.view">
+        <field name="name">res.partner.search.buildingpay</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.res_partner_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='customer']" position="after">
+                <!-- Filtri BuildingPay -->
+                <separator/>
+                <filter string="Amministratori"
+                        name="filter_amministratore"
+                        domain="[('is_amministratore', '=', True)]"/>
+                <filter string="Accordo Condomini Aggregati"
+                        name="filter_accordo_condomini"
+                        domain="[('accordo_condomini_aggregati', '=', True)]"/>
+                <filter string="Condomini"
+                        name="filter_type_condominio"
+                        domain="[('type', '=', 'condominio')]"/>
+                <separator/>
+            </xpath>
+            <xpath expr="//group" position="inside">
+                <!-- Raggruppamenti BuildingPay -->
+                <filter string="Amministratore"
+                        name="group_by_amministratore"
+                        context="{'group_by': 'is_amministratore'}"/>
+                <filter string="Accordo Condomini"
+                        name="group_by_accordo"
+                        context="{'group_by': 'accordo_condomini_aggregati'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

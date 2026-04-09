@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================
+         MENU PRINCIPALE BUILDINGPAY
+    ================================================= -->
+    <menuitem id="menu_buildingpay_root"
+              name="BuildingPay"
+              sequence="90"
+              web_icon="buildingpay,static/description/icon.png"
+              groups="buildingpay.group_buildingpay_user"/>
+
+    <!-- ================================================
+         MENU: CONFIGURAZIONE
+    ================================================= -->
+    <menuitem id="menu_buildingpay_config_root"
+              name="Configurazione"
+              parent="menu_buildingpay_root"
+              sequence="100"
+              groups="buildingpay.group_buildingpay_manager"/>
+
+    <menuitem id="menu_buildingpay_config"
+              name="Impostazioni BuildingPay"
+              parent="menu_buildingpay_config_root"
+              action="action_buildingpay_config"
+              sequence="10"
+              groups="buildingpay.group_buildingpay_manager"/>
+
+    <!-- ================================================
+         MENU: CONTABILITÀ - voci aggiuntive
+         Solo per gruppo Responsabile Amministrativo Condomini
+    ================================================= -->
+
+    <!-- Sottomenu all'interno di Contabilità > Configurazione -->
+    <menuitem id="menu_account_buildingpay_root"
+              name="BuildingPay"
+              parent="account.account_config_settings_action_account_config"
+              sequence="200"
+              groups="buildingpay.group_responsabile_amministrativo"
+              action="action_buildingpay_config"/>
+
+    <!-- Voce: Genera Fattura Condomini (upload excel) -->
+    <record id="menu_buildingpay_genera_fattura" model="ir.ui.menu">
+        <field name="name">Genera Fattura Condomini</field>
+        <field name="parent_id" ref="account.menu_finance_entries"/>
+        <field name="action" ref="action_buildingpay_import_new"/>
+        <field name="sequence">200</field>
+        <field name="groups_id" eval="[(6, 0, [ref('buildingpay.group_responsabile_amministrativo')])]"/>
+    </record>
+
+    <!-- Voce: Importazioni - Errori -->
+    <record id="menu_buildingpay_import_errors" model="ir.ui.menu">
+        <field name="name">Importazione Fatture Condomini - Errori</field>
+        <field name="parent_id" ref="account.menu_finance_entries"/>
+        <field name="action" ref="action_buildingpay_import_list"/>
+        <field name="sequence">201</field>
+        <field name="groups_id" eval="[(6, 0, [ref('buildingpay.group_responsabile_amministrativo')])]"/>
+    </record>
+</odoo>
